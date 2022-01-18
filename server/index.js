@@ -1,15 +1,15 @@
+const grpc = require('grpc');
+
 const greets = require('./protos/greet_pb');
 const greetService = require('./protos/greet_grpc_pb');
 
 const calculator = require('./protos/calculator_pb');
 const calculatorService = require('./protos/calculator_grpc_pb');
-
-const grpc = require("grpc");
+const { getName } = require('./util');
 
 /**
  * Implements the greet RPC method.
  */
-
 function greet(call, callback) {
   const greeting = new greets.GreetResponse();
   const names = call.request.getGreeting();
@@ -30,15 +30,6 @@ function calculate(call, callback) {
  
   callback(null, calculateSum);
 }
-
-// function main() {
-//   const server = new grpc.Server();
-//   server.addService(service.GreetServiceService, { greet, calculate });
-//   server.bind('0.0.0.0:50051', grpc.ServerCredentials.createInsecure());
-//   server.start();
-
-//   console.log('server running on 0.0.0.0:50051')
-// }
 
 function greetManyTimes(call, callback) {
   const firstName = call.request.getGreeting().getFirstName();
@@ -61,11 +52,11 @@ function primeNumberDecomposition(call, callback) {
   let number = call.request.getNumber();
   let divisor = 2;
 
-  console.log("Received number: ", number);
+  console.log('Received number: ', number);
 
   while (number > 1) {
     if (number % divisor === 0) {
-      var primeNumberDecompositionResponse = new calculator.PrimeNumberDecompositionResponse();
+      const primeNumberDecompositionResponse = new calculator.PrimeNumberDecompositionResponse();
 
       primeNumberDecompositionResponse.setResult(divisor);
 
@@ -75,16 +66,40 @@ function primeNumberDecomposition(call, callback) {
       call.write(primeNumberDecompositionResponse);
     } else {
       divisor++;
-      console.log("Divisor has increased to ", divisor);
+      console.log('Divisor has increased to ', divisor);
     }
   }
+}
+
+function longGreet(call, callback) {
+  call.on('data', req => {
+    const names = req.getGreeting();
+    const fullName = `${names.getFirstName()} ${names.getLastName()}`;
+
+    console.log(`Hello ${fullName}`);
+  });
+
+  call.on('error', err => {
+    console.error(err);
+  });
+
+  call.on('end', () => {
+    const response = new greets.LongGreetResponse();
+    response.setResult('Long Greet Client Streaming...');
+
+    callback(null, response);
+  })
 }
 
 function main() {
   const server = new grpc.Server();
   server.addService(calculatorService.CalculatorServiceService, { calculate });
   server.addService(calculatorService.PrimeNumberDecompositionServiceService, { primeNumberDecomposition });
-  server.addService(greetService.GreetServiceService, { greetManyTimes });
+  server.addService(greetService.GreetServiceService, {
+    greet,
+    greetManyTimes,
+    longGreet
+  });
   server.bind('0.0.0.0:50051', grpc.ServerCredentials.createInsecure());
   server.start();
 

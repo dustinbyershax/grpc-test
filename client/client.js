@@ -10,7 +10,7 @@ const serviceArgs = ['localhost:50051', grpc.credentials.createInsecure()]
 
 const callGreet = () => {
   // instantiate service client
-  const client = new greetService.GreetServiceClient('localhost:50051', grpc.credentials.createInsecure());
+  const client = new greetService.GreetServiceClient(...serviceArgs);
   // request  
   const request = new greets.GreetRequest();
   // payload
@@ -32,7 +32,7 @@ const callGreet = () => {
 }
 
 const callCalculate = () => {
-  const client = new calcService.CalculatorServiceClient('localhost:50051', grpc.credentials.createInsecure());
+  const client = new calcService.CalculatorServiceClient(...serviceArgs);
   const req = new calcs.SumRequest();
   const calculation = new calcs.CalculateSum();
   calculation.setFirstnumber(54);
@@ -49,7 +49,7 @@ const callCalculate = () => {
 }
 
 const callGreetManyTimes = () => {
-  const client = new greetService.GreetServiceClient('localhost:50051', grpc.credentials.createInsecure());
+  const client = new greetService.GreetServiceClient(...serviceArgs);
   const req = new greets.GreetManyTimesRequest();
   const greeting = new greets.Greeting();
   greeting.setFirstName('Dustin');
@@ -73,7 +73,7 @@ const callGreetManyTimes = () => {
 }
 
 const callPrimeNumberDecomposition = () => {
-  const client = new calcService.PrimeNumberDecompositionServiceClient('localhost:50051', grpc.credentials.createInsecure());
+  const client = new calcService.PrimeNumberDecompositionServiceClient(...serviceArgs);
   const req = new calcs.PrimeNumberDecompositionRequest();
   req.setNumber(120);
   console.log('calccs', client)
@@ -94,9 +94,39 @@ const callPrimeNumberDecomposition = () => {
   })
 }
 
+function callLongGreeting() {
+  const client = new greetService.GreetServiceClient(...serviceArgs);
+  const request = new greets.LongGreetRequest();
+
+  const call = client.longGreet(request, (error, response) => {
+    if (!error) {
+      console.log('Server Response: ', response.getResult());
+    } else {
+      console.error(error);
+    }
+  });
+
+  let count = 0;
+  let intervalId = setInterval(() => {
+    console.log(`Sending message ${count}`);
+    const greeting = new greets.Greeting();
+    greeting.setFirstName('r2');
+    greeting.setLastName('d2');
+
+    request.setGreeting(greeting);
+    call.write(request);
+
+    if (++count > 3) {
+      clearInterval(intervalId);
+      call.end(); // all messages have been sent
+    }
+  }, 1000);
+}
+
 const main = () => {
   // callCalculate();
   // callGreetManyTimes();
-  callPrimeNumberDecomposition();
+  // callPrimeNumberDecomposition();
+  callLongGreeting();
 };
 main()
