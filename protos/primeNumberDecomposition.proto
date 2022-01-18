@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package primeNumberDecomposition;
+
+service PrimeNumberDecompositionService {
+  // streaming API
+  rpc PrimeNumberDecomposition (PrimeNumberDecompositionRequest) returns (stream PrimeNumberDecompositionResponse){};
+}
+
+message PrimeNumberDecompositionRequest {
+  int32 integerValue = 1;
+}
+
+message PrimeNumberDecompositionResponse {
+  int32 result = 1;
+}
