@@ -4,6 +4,28 @@
 var grpc = require('grpc');
 var protos_calculator_pb = require('../protos/calculator_pb.js');
 
+function serialize_calculator_ComputeAverageRequest(arg) {
+  if (!(arg instanceof protos_calculator_pb.ComputeAverageRequest)) {
+    throw new Error('Expected argument of type calculator.ComputeAverageRequest');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_calculator_ComputeAverageRequest(buffer_arg) {
+  return protos_calculator_pb.ComputeAverageRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_calculator_ComputeAverageResponse(arg) {
+  if (!(arg instanceof protos_calculator_pb.ComputeAverageResponse)) {
+    throw new Error('Expected argument of type calculator.ComputeAverageResponse');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_calculator_ComputeAverageResponse(buffer_arg) {
+  return protos_calculator_pb.ComputeAverageResponse.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_calculator_PrimeNumberDecompositionRequest(arg) {
   if (!(arg instanceof protos_calculator_pb.PrimeNumberDecompositionRequest)) {
     throw new Error('Expected argument of type calculator.PrimeNumberDecompositionRequest');
@@ -61,6 +83,17 @@ calculate: {
     requestDeserialize: deserialize_calculator_SumRequest,
     responseSerialize: serialize_calculator_SumResponse,
     responseDeserialize: deserialize_calculator_SumResponse,
+  },
+  computeAverage: {
+    path: '/calculator.CalculatorService/ComputeAverage',
+    requestStream: true,
+    responseStream: false,
+    requestType: protos_calculator_pb.ComputeAverageRequest,
+    responseType: protos_calculator_pb.ComputeAverageResponse,
+    requestSerialize: serialize_calculator_ComputeAverageRequest,
+    requestDeserialize: deserialize_calculator_ComputeAverageRequest,
+    responseSerialize: serialize_calculator_ComputeAverageResponse,
+    responseDeserialize: deserialize_calculator_ComputeAverageResponse,
   },
 };
 

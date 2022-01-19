@@ -5,6 +5,16 @@ package calculator;
 service CalculatorService {
   // unary API
   rpc Calculate (SumRequest) returns (SumResponse) {};
+  rpc ComputeAverage (stream ComputeAverageRequest) returns (ComputeAverageResponse) {}
+}
+
+message ComputeAverageRequest {
+  int32 number = 1;
+}
+
+message ComputeAverageResponse {
+  reserved 1;
+  double result = 2;
 }
 
 message CalculateSum {

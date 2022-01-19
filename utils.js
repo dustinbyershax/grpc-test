@@ -1,3 +1,7 @@
+const grpc = require('grpc');
+
+const serviceArgs = ['localhost:50051', grpc.credentials.createInsecure()]
+
 const getName = (call, type) => {
   const names = call.request.getGreeting();
 
@@ -11,7 +15,12 @@ const getName = (call, type) => {
     default:
       throw new Error('invalid name format');
   }
-
 }
 
-module.exports = { getName };
+const generateUnsafeClient = (Client) => new Client(...serviceArgs);
+
+module.exports = { 
+  getName,
+  generateUnsafeClient,
+  serviceArgs,
+ };

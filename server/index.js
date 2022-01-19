@@ -5,7 +5,7 @@ const greetService = require('./protos/greet_grpc_pb');
 
 const calculator = require('./protos/calculator_pb');
 const calculatorService = require('./protos/calculator_grpc_pb');
-const { getName } = require('./util');
+const { getName } = require('../utils');
 
 /**
  * Implements the greet RPC method.
@@ -91,9 +91,34 @@ function longGreet(call, callback) {
   })
 }
 
+function computeAverage(call, callback) {
+  let total = 0;
+  let count = 0;
+
+  call.on('data', req => {
+    const val = req.getNumber();
+    console.log('received ', val);
+    total += val;
+    count++;
+  });
+
+  call.on('error', err => {
+    console.error(`Error in computeAverage: ${err}`);
+  });
+
+  call.on('end', () => {
+    const response = new calculator.ComputeAverageResponse();
+    const average = total / count;
+    console.log(`The average is ${average}`);
+
+    response.setResult(average);
+    callback(null, response);
+  });
+}
+
 function main() {
   const server = new grpc.Server();
-  server.addService(calculatorService.CalculatorServiceService, { calculate });
+  server.addService(calculatorService.CalculatorServiceService, { calculate, computeAverage });
   server.addService(calculatorService.PrimeNumberDecompositionServiceService, { primeNumberDecomposition });
   server.addService(greetService.GreetServiceService, {
     greet,
